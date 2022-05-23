@@ -16,3 +16,6 @@ Source Folders
 - styles: main CSS theme
 - utils: contain some utility function
 
+Improvement
+- Can be improved using SSR for faster LCP.
+
