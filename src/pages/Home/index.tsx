@@ -1,12 +1,15 @@
-import { useState } from "react";
+import { useContext, useMemo, useState } from "react";
+
 import Search from "@components/Search";
 import Select from "@components/Select";
+
+import { TransactionContext } from "@context/transactions";
+import useDebounce from "@hooks/useDebounce";
+import { thousandSeparator } from "@utils/thousandSeparator";
 import type { SelectOption } from "@components/Select/types";
-import { TRANSACTION_API } from "@constants/api";
-import useFetch from "@hooks/useFetch";
 import { styPageContent } from "@styles/base";
 
-import { DEFAULT_SORT_METHOD, SORT_METHODS } from "./config";
+import { DEFAULT_SORT_METHOD, SORT_FUNCTIONS, SORT_METHODS } from "./config";
 import TransactionCard from "./TransactionCard";
 import {
   styGreetingContainer,
@@ -19,7 +22,8 @@ function Home() {
   const [searchKeyword, setSearchKeyword] = useState("");
   const [sortMethod, setSortMethod] = useState(DEFAULT_SORT_METHOD);
 
-  const { data, isLoading } = useFetch(TRANSACTION_API);
+  const { transactions, isLoading, totalAmount } =
+    useContext(TransactionContext);
 
   const handleSearchKeyword = (newKeyword: string) => {
     setSearchKeyword(newKeyword);
@@ -28,6 +32,37 @@ function Home() {
   const handleChangeSortMethod = (option: SelectOption) => {
     setSortMethod(option);
   };
+
+  const debouncedKeyword = useDebounce(searchKeyword);
+
+  const transactionsByKeyword = useMemo(() => {
+    if (debouncedKeyword) {
+      return transactions.filter((transaction) => {
+        const { beneficiary_bank, sender_bank, beneficiary_name } = transaction;
+
+        const keyword = debouncedKeyword.toLocaleLowerCase();
+
+        const beneficiaryBank = beneficiary_bank.toLocaleLowerCase();
+        const senderBank = sender_bank.toLocaleLowerCase();
+        const beneficiaryName = beneficiary_name.toLocaleLowerCase();
+
+        return (
+          senderBank.includes(keyword) ||
+          beneficiaryBank.includes(keyword) ||
+          beneficiaryName.includes(keyword)
+        );
+      });
+    }
+    return transactions;
+  }, [debouncedKeyword, transactions]);
+
+  const orderedTransactions = useMemo(()=>{
+    if(sortMethod.label){
+      const sortFunction = SORT_FUNCTIONS[sortMethod.id]
+      return transactionsByKeyword.sort(sortFunction)
+    }
+    return transactionsByKeyword;
+  },[sortMethod, transactionsByKeyword])
 
   if (isLoading) return <div>Loading</div>;
 
@@ -38,8 +73,8 @@ function Home() {
       <div className={styGreetingContainer}>
         <p>Halo kak!</p>
         <span>
-          Kamu telah melakukan transaksi sebesar <em>Rp5.000.000</em> sejak
-          menggunakan Flip.
+          Kamu telah melakukan transaksi sebesar&nbsp;
+          <em>Rp {thousandSeparator(totalAmount)}</em> sejak menggunakan Flip.
         </span>
       </div>
 
@@ -59,10 +94,14 @@ function Home() {
       </div>
 
       <div className={styTransactionList}>
-        {data &&
-          Object.entries(data).map(([key, value]) => {
-            return <TransactionCard key={key} transactionData={value as TransactionData} />;
-          })}
+        {orderedTransactions.map((transaction: TransactionData) => {
+          return (
+            <TransactionCard
+              key={transaction.id}
+              transactionData={transaction}
+            />
+          );
+        })}
       </div>
     </div>
   );

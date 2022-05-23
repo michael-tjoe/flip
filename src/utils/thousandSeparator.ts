@@ -1,3 +1,3 @@
-export const thousandSeparator = (value: string) => {
-  return value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+export const thousandSeparator = (value: string | number) => {
+  return String(value).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 };
