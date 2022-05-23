@@ -1,6 +1,7 @@
 import { useContext } from "react";
 import { useRouter } from "next/router";
 import Image from "next/image";
+
 import Button from "@components/Button";
 import { TransactionContext } from "@context/transactions";
 import { styPageContent } from "@styles/base";
@@ -14,6 +15,7 @@ import {
   styTransactionDetailCard,
   styTransactionInfo,
 } from "./styles";
+import Loader from "@components/Loader";
 
 function TransactionDetail() {
   const { transactions, isLoading } = useContext(TransactionContext);
@@ -40,53 +42,57 @@ function TransactionDetail() {
     router.push("/");
   };
 
-  if (isLoading) return <div>Loading</div>;
-
   return (
     <div className={styPageContent}>
       <h1 className="title">Detail Transaksi</h1>
 
-      <div className={styTransactionDetailCard}>
-        <p>Id Transaksi: #{transactionDetail?.id || ""}</p>
-        <Button success={isSuccess} ghost={!isSuccess} primary={!isSuccess}>
-          {isSuccess ? "Berhasil" : "Pengecekan"}
-        </Button>
-      </div>
+      {isLoading ? (
+        <Loader />
+      ) : (
+        <>
+          <div className={styTransactionDetailCard}>
+            <p>Id Transaksi: #{transactionDetail?.id || ""}</p>
+            <Button success={isSuccess} ghost={!isSuccess} primary={!isSuccess}>
+              {isSuccess ? "Berhasil" : "Pengecekan"}
+            </Button>
+          </div>
 
-      <div className={styTransactionInfo}>
-        {/* TODO Replace image accordint to mock (currently i dont know how to download the image) */}
-        <div className="icon">
-          <Image layout="fill" alt="" src="/transaction.png" />
-        </div>
+          <div className={styTransactionInfo}>
+            {/* TODO Replace image accordint to mock (currently i dont know how to download the image) */}
+            <div className="icon">
+              <Image layout="fill" alt="" src="/transaction.png" />
+            </div>
 
-        <dl>
-          <dt>Pengirim</dt>
-          <dd className="uppercase">{senderBank}</dd>
+            <dl>
+              <dt>Pengirim</dt>
+              <dd className="uppercase">{senderBank}</dd>
 
-          <dt>Penerima</dt>
-          <dd>{beneficiaryBank}</dd>
-          <dd>{accountNumber}</dd>
-          <dd>{beneficiaryName}</dd>
+              <dt>Penerima</dt>
+              <dd>{beneficiaryBank}</dd>
+              <dd>{accountNumber}</dd>
+              <dd>{beneficiaryName}</dd>
 
-          <dt>Nominal</dt>
-          <dd>Rp&nbsp;{thousandSeparator(amount)}</dd>
-          <dd className="bold">
-            Kode Unik: <span>{uniqueCode}</span>
-          </dd>
+              <dt>Nominal</dt>
+              <dd>Rp&nbsp;{thousandSeparator(amount)}</dd>
+              <dd className="bold">
+                Kode Unik: <span>{uniqueCode}</span>
+              </dd>
 
-          <dt>Catatan</dt>
-          <dd>{remark}</dd>
+              <dt>Catatan</dt>
+              <dd>{remark}</dd>
 
-          <dt>Waktu Dibuat</dt>
-          <dd>{getFormattedDate(createdAt)}</dd>
-        </dl>
-      </div>
+              <dt>Waktu Dibuat</dt>
+              <dd>{getFormattedDate(createdAt)}</dd>
+            </dl>
+          </div>
 
-      <div className={styCtaWrapper}>
-        <Button onClick={handleClickBack} className="cta" ghost primary>
-          Kembali
-        </Button>
-      </div>
+          <div className={styCtaWrapper}>
+            <Button onClick={handleClickBack} className="cta" ghost primary>
+              Kembali
+            </Button>
+          </div>
+        </>
+      )}
     </div>
   );
 }
