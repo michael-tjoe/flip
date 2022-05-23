@@ -1,9 +1,12 @@
 import { memo } from "react";
+import { useRouter } from "next/router";
 import Button from "@components/Button";
-import type { TransactionData } from "../types";
-import { styTransactionWrapper } from "./styles";
+
 import { thousandSeparator } from "@utils/thousandSeparator";
 import { getFormattedDate } from "@utils/parseDate";
+
+import type { TransactionData } from "../types";
+import { styTransactionWrapper } from "./styles";
 import { EnumTransactionStatus } from "./constants";
 
 interface TransactionCardProps {
@@ -11,6 +14,8 @@ interface TransactionCardProps {
 }
 
 function TransactionCard({ transactionData }: TransactionCardProps) {
+  const router = useRouter();
+
   const {
     sender_bank,
     beneficiary_bank,
@@ -20,10 +25,15 @@ function TransactionCard({ transactionData }: TransactionCardProps) {
     status,
   } = transactionData;
 
+  const handleClick = (e) => {
+    e.preventDefault();
+    router.push(`/detail/${transactionData.id}`);
+  };
+
   const isSuccess = status === EnumTransactionStatus.SUCCESS;
 
   return (
-    <div className={styTransactionWrapper}>
+    <div onClick={handleClick} className={styTransactionWrapper}>
       <div {...(isSuccess && { "data-success": true })} className="content">
         <div className="transaction-detail">
           <h2>

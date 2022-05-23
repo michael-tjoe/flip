@@ -1,4 +1,5 @@
 import type { SelectOption } from "@components/Select/types";
+import { parseDate } from "@utils/parseDate";
 import { TransactionData } from "./types";
 
 export const DEFAULT_SORT_METHOD = {
@@ -43,6 +44,19 @@ const sortString = (firstData, secondData, isAscending) => {
   return 0;
 };
 
+const sortDate = (firstData, secondData, isAscending) => {
+  var dateA = firstData.getTime();
+  var dateB = secondData.getTime();
+
+  const firstPrecedenceCondition = isAscending ? dateA < dateB : dateA > dateB;
+  const secondPrecedenceCondition = isAscending ? dateA > dateB : dateA < dateB;
+
+  if (firstPrecedenceCondition) return -1;
+  if (secondPrecedenceCondition) return 1;
+
+  return 0;
+};
+
 export const SORT_FUNCTIONS = {
   1: (a: TransactionData, b: TransactionData) => {
     const firstBeneficiaryName = a.beneficiary_name.toLowerCase();
@@ -57,14 +71,14 @@ export const SORT_FUNCTIONS = {
   },
 
   3: (a: TransactionData, b: TransactionData) => {
-    const firstBeneficiaryName = a.beneficiary_name.toLowerCase();
-    const secondBeneficiaryName = b.beneficiary_name.toLocaleLowerCase();
-    return sortString(firstBeneficiaryName, secondBeneficiaryName, true);
+    const firstDate = parseDate(a.created_at);
+    const secondDate = parseDate(b.created_at);
+    return sortDate(firstDate, secondDate, false);
   },
 
   4: (a: TransactionData, b: TransactionData) => {
-    const firstBeneficiaryName = a.beneficiary_name.toLowerCase();
-    const secondBeneficiaryName = b.beneficiary_name.toLocaleLowerCase();
-    return sortString(firstBeneficiaryName, secondBeneficiaryName, true);
+    const firstDate = parseDate(a.created_at);
+    const secondDate = parseDate(b.created_at);
+    return sortDate(firstDate, secondDate, true);
   },
 };

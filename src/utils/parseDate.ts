@@ -28,5 +28,7 @@ export function formatDate(date: Date) {
 }
 
 export function getFormattedDate(value: string) {
+  if (!value) return "";
+
   return formatDate(parseDate(value));
 }

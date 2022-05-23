@@ -6,6 +6,7 @@ export const styTransactionWrapper = css`
   border-radius: 4px;
   overflow: hidden;
   background-color: white;
+  cursor: pointer;
 
   > .content {
     padding: 16px;
